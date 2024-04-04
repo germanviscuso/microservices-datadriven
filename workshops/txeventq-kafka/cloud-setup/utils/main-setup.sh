@@ -183,20 +183,29 @@ fi
 
 # Get Namespace
 while ! state_done NAMESPACE; do
-  NAMESPACE=$(oci os ns get --compartment-id "$(state_get COMPARTMENT_OCID)" --query "data" --raw-output)
+  NAMESPACE=$(oci os ns get --query "data" --raw-output)
   state_set NAMESPACE "$NAMESPACE"
 done
 
 # Install GraalVM
-GRAALVM_VERSION="22.2.0"
-if ! state_get GRAALVM_INSTALLED; then
-  if ps -ef | grep "$LAB_HOME/cloud-setup/java/graalvm-install.sh" | grep -v grep; then
-    echo "$LAB_HOME/cloud-setup/java/graalvm-install.sh is already running"
-  else
-    echo "Executing java/graalvm-install.sh in the background"
-    nohup "$LAB_HOME"/cloud-setup/java/graalvm-install.sh ${GRAALVM_VERSION} &>>"$LAB_LOG"/graalvm_install.log &
-  fi
+#GRAALVM_VERSION="22.2.0"
+#if ! state_get GRAALVM_INSTALLED; then
+#  if ps -ef | grep "$LAB_HOME/cloud-setup/java/graalvm-install.sh" | grep -v grep; then
+#    echo "$LAB_HOME/cloud-setup/java/graalvm-install.sh is already running"
+#  else
+#    echo "Executing java/graalvm-install.sh in the background"
+#    nohup "$LAB_HOME"/cloud-setup/java/graalvm-install.sh ${GRAALVM_VERSION} &>>"$LAB_LOG"/graalvm_install.log &
+#  fi
+#fi
+
+if ! state_done CONTAINER_ENG_SETUP; then
+  echo "$(date): Installing GraalVM CE Java 11 Image"
+  docker pull ghcr.io/graalvm/graalvm-ce:ol8-java11 --quiet
+  state_set CONTAINER_ENG_SETUP "ghcr.io/graalvm/graalvm-ce:ol8-java11"
+  echo
 fi
+
+state_set_done GRAALVM_INSTALLED
 
 # run oracle_db_setup.sh in background
 if ! state_get DB_SETUP; then
