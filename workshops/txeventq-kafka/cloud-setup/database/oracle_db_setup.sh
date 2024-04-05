@@ -53,6 +53,13 @@ while ! state_done OBJECT_STORE_BUCKET; do
   state_set_done OBJECT_STORE_BUCKET
 done
 
+# Wait for the bucket to be fully created and available
+echo "Waiting for the bucket to become available..."
+while ! oci os bucket get --bucket-name "$(state_get RUN_NAME)" &>/dev/null; do
+  echo "Bucket not yet available, waiting..."
+  sleep 2
+done
+
 # Get DB Connection Wallet and to Object Store
 while ! state_done CWALLET_SSO_OBJECT; do
   cd "$LAB_HOME"/wallet
