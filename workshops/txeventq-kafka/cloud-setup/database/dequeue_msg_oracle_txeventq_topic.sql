@@ -38,5 +38,12 @@ begin
     else
         DBMS_OUTPUT.put_line('ERR : at least one of the variables is null !');
     end if;
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE = -25228 THEN
+      DBMS_OUTPUT.PUT_LINE('No messages to dequeue: Queue is empty.');
+    ELSE
+      RAISE;
+    END IF;
 end;
 /
